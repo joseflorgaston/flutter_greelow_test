@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_greelow_test/entities/contact.dart';
+import 'package:flutter_greelow_test/widgets/custom_rounded_button.dart';
+
+import 'entities/button_options.dart';
 
 void main() {
   runApp(const MyApp());
@@ -7,270 +11,161 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData.dark(
-        useMaterial3: true,
+      title: 'Contactos Demo',
+      theme: ThemeData.dark().copyWith(
+        scaffoldBackgroundColor: const Color(0xff121212),
       ),
+      debugShowCheckedModeBanner: false,
       home: const HomePage(),
     );
   }
 }
 
-class HomePage extends StatefulWidget {
+class HomePage extends StatelessWidget {
   const HomePage({super.key});
-
-  @override
-  State<HomePage> createState() => _HomePageState();
-}
-
-class ButtonOptions {
-  final IconData icon;
-  final String text;
-
-  const ButtonOptions({
-    required this.icon,
-    required this.text,
-  });
-}
-
-class _HomePageState extends State<HomePage> {
-  final List<String> favoriteContactList = [
-    'Juana Ayala',
-    'Luis Jimenez',
-  ];
-  final List<String> savedContactList = [
-    'Adriana Salinas',
-    'Alberto Torres',
-    'Juana Ayala',
-  ];
-
-  final List<ButtonOptions> buttonOptions = [
-    const ButtonOptions(
-      icon: Icons.compare_arrows,
-      text: 'Transferir',
-    ),
-    const ButtonOptions(
-      icon: Icons.wallet,
-      text: 'Pagar',
-    ),
-    const ButtonOptions(
-      icon: Icons.compare_arrows,
-      text: 'Retirar',
-    ),
-    const ButtonOptions(
-      icon: Icons.compare_arrows,
-      text: 'Depositar',
-    ),
-  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xff121212),
       appBar: AppBar(
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications),
+            icon: const Icon(Icons.notification_add_outlined),
             onPressed: () {},
           ),
           IconButton(
-            icon: const Icon(
-              Icons.message_rounded,
-              color: Colors.orange,
-            ),
+            icon: const Icon(Icons.chat_bubble_outline, color: Colors.orange),
             onPressed: () {},
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: CustomScrollView(
-          slivers: <Widget>[
-            const SliverAppBar(
-              pinned: false,
-              snap: false,
-              floating: true,
-              expandedHeight: 20.0,
-              flexibleSpace: FlexibleSpaceBar(
-                collapseMode: CollapseMode.pin,
-                title: Text(
+      body: Stack(
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Text(
                   'Mover dinero',
                   style: TextStyle(fontSize: 24),
                 ),
               ),
-            ),
-            SliverGrid(
-              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                maxCrossAxisExtent: 200.0,
-                mainAxisSpacing: 10.0,
-                crossAxisSpacing: 10.0,
-                childAspectRatio: 2.0,
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                  child: GridView.builder(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 10,
+                      mainAxisSpacing: 10,
+                      childAspectRatio: 2,
+                    ),
+                    itemCount: 4,
+                    itemBuilder: (context, index) {
+                      final icon = buttonOptions[index].icon;
+                      final text = buttonOptions[index].title;
+                      return CustomRoundedButton(text: text, icon: icon);
+                    },
+                  ),
+                ),
               ),
-              delegate: SliverChildBuilderDelegate(
-                (BuildContext context, int index) {
-                  return CustomGridContainer(
-                    icon: buttonOptions[index].icon,
-                    text: buttonOptions[index].text,
-                  );
-                },
-                childCount: buttonOptions.length,
-              ),
-            ),
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (BuildContext context, int index) {
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 20),
-                      const Text(
-                        'Contactos',
-                        style: TextStyle(
-                          fontSize: 24,
+            ],
+          ),
+          DraggableScrollableSheet(
+            initialChildSize: 0.6,
+            minChildSize: 0.6,
+            maxChildSize: 1.0,
+            builder: (context, scrollController) {
+              return Container(
+                decoration: const BoxDecoration(
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(30),
+                    topRight: Radius.circular(30),
+                  ),
+                  color: Color(0xff1C1C1C),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 10),
+                        const Padding(
+                          padding: EdgeInsets.all(16.0),
+                          child: Text(
+                            'Contactos',
+                            style: TextStyle(fontSize: 24),
+                          ),
                         ),
-                      ),
-                      SizedBox(
-                        width: 100,
-                        child: TextButton(
+                        TextButton(
                           onPressed: () {},
                           child: const Row(
                             children: [
                               Icon(Icons.add, color: Colors.orange),
+                              SizedBox(width: 10),
                               Text(
                                 'Nuevo',
-                                style: TextStyle(color: Colors.orange),
+                                style: TextStyle(
+                                  color: Colors.orange,
+                                ),
                               ),
                             ],
                           ),
                         ),
+                      ],
+                    ),
+                    Expanded(
+                      child: ListView.builder(
+                        controller: scrollController,
+                        itemCount: contacts.length,
+                        itemBuilder: (context, index) {
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (contacts[index].subtitle.isNotEmpty)
+                                Padding(
+                                  padding: const EdgeInsets.all(12),
+                                  child: Text(
+                                    contacts[index].subtitle,
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                    ),
+                                  ),
+                                ),
+                              ListTile(
+                                leading: Container(
+                                  width: 50,
+                                  height: 50,
+                                  decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(50),
+                                  ),
+                                  clipBehavior: Clip.hardEdge,
+                                  child: Image.network(
+                                    contacts[index].picture,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                                title: Text(contacts[index].name),
+                                trailing: const Icon(Icons.more_vert),
+                              ),
+                              const SizedBox(height: 20),
+                            ],
+                          );
+                        },
                       ),
-                    ],
-                  );
-                },
-                childCount: 1,
-              ),
-            ),
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (BuildContext context, int index) {
-                  return Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (index == 0) ...[
-                          const Text(
-                            'Favoritos',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                        ],
-                        Row(
-                          children: [
-                            Container(
-                              width: 50,
-                              height: 50,
-                              decoration: BoxDecoration(
-                                color: Colors.blue,
-                                borderRadius: BorderRadius.circular(50),
-                              ),
-                            ),
-                            const SizedBox(width: 15),
-                            Text(favoriteContactList[index]),
-                            const Spacer(),
-                            IconButton(
-                              onPressed: () {},
-                              icon: const Icon(Icons.menu_rounded),
-                            ),
-                          ],
-                        ),
-                      ],
                     ),
-                  );
-                },
-                childCount: favoriteContactList.length,
-              ),
-            ),
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (BuildContext context, int index) {
-                  return Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (index == 0) ...[
-                          const Text('Guardados'),
-                          const SizedBox(height: 10),
-                        ],
-                        Row(
-                          children: [
-                            Container(
-                              width: 50,
-                              height: 50,
-                              decoration: BoxDecoration(
-                                color: Colors.blue,
-                                borderRadius: BorderRadius.circular(50),
-                              ),
-                            ),
-                            const SizedBox(width: 15),
-                            Text(savedContactList[index]),
-                            const Spacer(),
-                            IconButton(
-                              onPressed: () {},
-                              icon: const Icon(Icons.menu_rounded),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  );
-                },
-                childCount: savedContactList.length,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class CustomGridContainer extends StatelessWidget {
-  final IconData icon;
-  final String text;
-
-  const CustomGridContainer({
-    super.key,
-    required this.icon,
-    required this.text,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        color: Color(0xff2A2D32),
-        gradient: LinearGradient(
-          colors: [
-            Color(0xff2A2D32),
-            Color(0xff23262A),
-          ],
-        ),
-        borderRadius: BorderRadius.all(Radius.circular(8)),
-      ),
-      alignment: Alignment.center,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon),
-          Text(text),
+                  ],
+                ),
+              );
+            },
+          ),
         ],
       ),
     );
